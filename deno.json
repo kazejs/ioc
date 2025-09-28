@@ -35,7 +35,10 @@
     "exclude": [
       "dist/",
       ".coverage/"
-    ]
+    ],
+    "rules": {
+      "exclude": ["no-import-prefix"]
+    }
   },
   "publish": {
     "include": [
