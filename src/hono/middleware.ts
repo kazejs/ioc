@@ -1,12 +1,13 @@
-import type { IContainer, IocVariables, ProviderToken } from "./types.ts";
-import { createMiddleware } from "hono/factory";
+import type { MiddlewareHandler } from "npm:hono@^4.9.9";
+import { createMiddleware } from "npm:hono@^4.9.9/factory";
+import type { IContainer, IocVariables, ProviderToken } from "../types.ts";
 
 type Env = { Variables: IocVariables & { requestId: string } };
 
 /**
- * Middleware para injetar serviços no contexto da requisição
+ * Middleware para injetar serviços no contexto da requisição do Hono
  */
-export function contextIoC(container: IContainer) {
+export function contextIoC(container: IContainer): MiddlewareHandler<Env> {
   return createMiddleware<Env>(async (ctx, next) => {
     const scopeId = container.createScope(ctx.var.requestId);
 

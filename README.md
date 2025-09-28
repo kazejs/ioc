@@ -1,4 +1,43 @@
-# Sistema de Injeção de Dependências (IoC) para Deno + Hono
+# Injeção de Dependências (IoC)
+
+Biblioteca standalone, sem dependências externas, para Injeção de Dependências
+(IoC) em aplicações Deno/NodeJS/TypeScript, com suporte a namespaces, escopos e
+lifecycle hooks.
+
+Inclui middleware para integração com frameworks web como Hono.
+
+## Características
+
+- ✅ **Zero dependências** - Funciona standalone
+- ✅ **Multi-plataforma** - Deno, Node.js e navegadores
+- ✅ **TypeScript nativo** - Totalmente tipado
+- ✅ **Namespaces isolados** - Múltiplos containers independentes
+- ✅ **Gestão de escopos** - Singleton, Scoped, Transient
+- ✅ **Lifecycle hooks** - onApplicationBootstrap/Shutdown
+- ✅ **Middleware web** - Integração com Hono (extensível para outros
+  frameworks)
+- ✅ **Injeção automática** - Resolve dependências recursivamente
+- ✅ **Factories dinâmicas** - Criação sob demanda com contexto
+
+## Instalação
+
+### Deno
+
+```typescript
+import { IoC, LifeTime } from "@kazejs/ioc";
+import { contextIoC } from "@kazejs/ioc/hono"; // Para Hono
+```
+
+### Node.js / NPM
+
+```bash
+npm install @kazejs/ioc
+```
+
+```typescript
+import { IoC, LifeTime } from "@kazejs/ioc";
+import { contextIoC } from "@kazejs/ioc/hono"; // Para Hono (requer: npm install hono)
+```
 
 ## Visão Geral
 
@@ -27,7 +66,7 @@ enum LifeTime {
 Ponto de acesso global para gerenciamento de containers:
 
 ```typescript
-import { IoC, LifeTime } from "@kaze/core/ioc/mod.ts";
+import { IoC, LifeTime } from "@kazejs/ioc";
 
 // Registrar provider
 IoC.register({
@@ -49,7 +88,7 @@ const db = IoC.use("db", "database");
 Implementação do container de DI:
 
 ```typescript
-import { Container, LifeTime } from "@kaze/core/ioc/mod.ts";
+import { Container, LifeTime } from "@kazejs/ioc";
 
 const container = new Container("myApp");
 
@@ -78,10 +117,7 @@ container.clearScope(scopeId);
 Serviços podem implementar hooks de inicialização e finalização:
 
 ```typescript
-import {
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
-} from "@kaze/core/ioc/mod.ts";
+import { OnApplicationBootstrap, OnApplicationShutdown } from "@kazejs/ioc";
 
 class DatabaseService implements OnApplicationBootstrap, OnApplicationShutdown {
   private connection: any;
@@ -130,19 +166,28 @@ Injeção automática de IoC no contexto de requisições:
 
 ```typescript
 import { Hono } from "hono";
-import { IoC, iocMiddleware } from "@kaze/core/ioc/mod.ts";
+import { IoC } from "@kazejs/ioc";
+import { contextIoC } from "@kazejs/ioc/hono";
+import type { IocVariables } from "@kazejs/ioc/types";
 
-const app = new Hono();
+type Env = {
+  Variables: IocVariables & {
+    // Suas variáveis customizadas aqui
+    requestId: string;
+  };
+};
+
+const app = new Hono<Env>();
 const container = IoC.ns("default");
 
-app.use(iocMiddleware(container));
+app.use(contextIoC(container));
 
 app.get("/", (c) => {
   // Acessar container
   const ioc = c.var.ioc; // ou c.get("ioc");
 
   // Usar função helper (com escopo automático)
-  const service = c.var.ioc.use<MyService>("myService");
+  const service = c.get("use")<MyService>("myService");
 
   return c.json({ message: "OK" });
 });
@@ -174,9 +219,9 @@ IoC.register({
 });
 
 // Factory inline com useFactory()
-const useDemo = ioc.useFactory((c) => {
-  times++;
-  return c.stub.foo();
+const container = IoC.ns("default");
+const useDemo = container.useFactory((c) => {
+  return new DemoService(c.get("config"));
 });
 
 const service = useDemo();
@@ -236,18 +281,37 @@ await container.initializeServices();
 await container.shutdownServices();
 ```
 
+## Namespaces
+
+Isolamento de containers por contexto:
+
+```typescript
+// Container padrão
+IoC.register({ token: "service", useClass: Service });
+
+// Container específico
+IoC.register({ token: "service", useClass: TestService }, "test");
+
+// Uso
+const prodService = IoC.use("service"); // default namespace
+const testService = IoC.use("service", "test"); // test namespace
+
+// Acesso direto a namespace
+const testContainer = IoC.ns("test");
+testContainer.register({ token: "custom", useValue: {} });
+```
+
 ## Exemplo Completo
 
 ```typescript
 import { Hono } from "hono";
 import {
   IoC,
-  iocMiddleware,
   LifeTime,
   OnApplicationBootstrap,
   OnApplicationShutdown,
-} from "@kaze/core/ioc/mod.ts";
-import {} from "@kaze/core/ioc/mod.ts";
+} from "@kazejs/ioc";
+import { contextIoC } from "@kazejs/ioc/hono";
 
 // Serviços com Lifecycle
 class Logger implements OnApplicationBootstrap {
@@ -298,12 +362,12 @@ IoC.register({
 await container.initializeServices();
 
 // Middleware
-app.use(iocMiddleware(container));
+app.use(contextIoC(container));
 
 // Rotas
 app.get("/", (c) => {
-  const logger = c.var.ioc.use<Logger>("logger");
-  const db = c.var.ioc.use<DatabaseService>("database");
+  const logger = c.get("use")<Logger>("logger");
+  const db = c.get("use")<DatabaseService>("database");
 
   logger.log("Requisição recebida");
   const data = db.query("SELECT * FROM users");
@@ -316,26 +380,6 @@ process.on("SIGINT", async () => {
   await container.shutdownServices();
   process.exit(0);
 });
-```
-
-## Namespaces
-
-Isolamento de containers por contexto:
-
-```typescript
-// Container padrão
-IoC.register({ token: "service", useClass: Service });
-
-// Container específico
-IoC.register({ token: "service", useClass: TestService }, "test");
-
-// Uso
-const prodService = IoC.use("service"); // default namespace
-const testService = IoC.use("service", "test"); // test namespace
-
-// Acesso direto a namespace
-const testContainer = IoC.ns("test");
-testContainer.register({ token: "custom", useValue: {} });
 ```
 
 ## Contribuições

@@ -1,0 +1,38 @@
+name: Deno
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "🛠️ Setup repo"
+        uses: actions/checkout@v4
+
+      - name: "🦕 Setup Deno"
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: "📝 Verify formatting"
+        run: deno fmt --check
+
+      - name: "🔍 Run linter"
+        run: deno lint
+
+      - name: "✅ Run check"
+        run: deno check
+
+      - name: "🧪 Run tests"
+        run: deno task test:cov
+
+      - name: "📊 Run check coverage"
+        run: deno task test:cov-check

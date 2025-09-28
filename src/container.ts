@@ -5,14 +5,12 @@ import type {
   ProviderToken,
   UseFactoryFn,
 } from "./types.ts";
-import { type ILogger, Logger } from "../logger/mod.ts";
 import { LifeTime } from "./enums.ts";
 
 /**
  * Classe responsável por gerenciar os serviços da aplicação
  */
 export class Container implements IContainer {
-  private readonly logger: ILogger;
   private readonly services = new Map<ProviderToken, unknown>();
 
   private readonly serviceFactories = new Map<
@@ -29,9 +27,7 @@ export class Container implements IContainer {
 
   private initializing = false;
 
-  constructor(public readonly namespace = "default") {
-    this.logger = Logger.create(`IoC::${namespace}`);
-  }
+  constructor(public readonly namespace = "default") {}
 
   /**
    * Registra um serviço no container
@@ -248,7 +244,11 @@ export class Container implements IContainer {
         "onApplicationBootstrap" in service &&
         typeof service.onApplicationBootstrap === "function"
       ) {
-        this.logger.info(`⚙️ Bootstrap serviço: ${this.tokenToString(token)}`);
+        console.info(
+          `[IoC::${this.namespace}] ⚙️ Bootstrap serviço: ${
+            this.tokenToString(token)
+          }`,
+        );
         await service.onApplicationBootstrap();
       }
     }
@@ -268,8 +268,10 @@ export class Container implements IContainer {
           "onApplicationBootstrap" in instance &&
           typeof instance.onApplicationBootstrap === "function"
         ) {
-          this.logger.info(
-            `🏭 Bootstrap serviço factory: ${this.tokenToString(token)}`,
+          console.info(
+            `[IoC::${this.namespace}] 🏭 Bootstrap serviço factory: ${
+              this.tokenToString(token)
+            }`,
           );
           initPromises.push(instance.onApplicationBootstrap());
         }
@@ -293,7 +295,11 @@ export class Container implements IContainer {
         "onApplicationShutdown" in service &&
         typeof service.onApplicationShutdown === "function"
       ) {
-        this.logger.info(`🛑 Shutdown serviço: ${this.tokenToString(token)}`);
+        console.info(
+          `[IoC::${this.namespace}] 🛑 Shutdown serviço: ${
+            this.tokenToString(token)
+          }`,
+        );
         shutdownPromises.push(service.onApplicationShutdown(signal));
       }
     }
