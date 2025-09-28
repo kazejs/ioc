@@ -168,8 +168,16 @@ Injeção automática de IoC no contexto de requisições:
 import { Hono } from "hono";
 import { IoC } from "@kazejs/ioc";
 import { contextIoC } from "@kazejs/ioc/hono";
+import type { IocVariables } from "@kazejs/ioc/types";
 
-const app = new Hono();
+type Env = {
+  Variables: IocVariables & {
+    // Suas variáveis customizadas aqui
+    requestId: string;
+  };
+};
+
+const app = new Hono<Env>();
 const container = IoC.ns("default");
 
 app.use(contextIoC(container));
