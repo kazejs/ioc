@@ -1,0 +1,42 @@
+{
+  "name": "@kazejs/ioc",
+  "description": "Biblioteca de Inversão de Controle (IoC) para TypeScript e JavaScript, para Deno e Node.js.",
+  "version": "1.0.2",
+  "license": "MIT",
+  "exports": {
+    ".": "./mod.ts",
+    "./types": "./types.ts"
+  },
+  "exclude": [
+    "dist/",
+    ".tmp/",
+    ".coverage/"
+  ],
+  "coverageThreshold": {
+    "branches": 40,
+    "lines": 80
+  },
+  "lint": {
+    "exclude": [
+      "dist/",
+      ".coverage/",
+      "scripts/mods/"
+    ]
+  },
+  "publish": {
+    "include": [
+      "src",
+      "mod.ts",
+      "types.ts",
+      "LICENSE",
+      "README.md"
+    ],
+    "exclude": [
+      "tests",
+      "scripts",
+      ".tmp",
+      "node_modules",
+      "scripts/mods"
+    ]
+  }
+}
