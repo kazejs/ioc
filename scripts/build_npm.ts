@@ -1,6 +1,6 @@
 // REF: https://deno.com/blog/publish-esm-cjs-module-dnt
-import { build, emptyDir } from "jsr:@deno/dnt@^0.41.3";
-import { parseArgs } from "jsr:@std/cli/parse-args";
+import { build, emptyDir } from "@deno/dnt";
+import { parseArgs } from "@std/cli/parse-args";
 
 const args = parseArgs(Deno.args, {
   alias: {
@@ -27,14 +27,14 @@ await emptyDir("./dist");
 
 await build({
   entryPoints: [
-    "./mod.ts",
+    "./src/mod.ts",
     {
       name: "./types",
-      path: "types.ts",
+      path: "src/types.ts",
     },
     {
       name: "./hono",
-      path: "hono.ts",
+      path: "src/hono/mod.ts",
     },
   ],
   rootTestDir: "./tests",
@@ -48,12 +48,13 @@ await build({
   },
   test,
   typeCheck: test ? false : "single",
+  packageManager: "npm",
   package: {
     name: infoDeno.name,
     version,
     description: infoDeno.description,
     license: infoDeno.license,
-    devDependencies: {
+    peerDependencies: {
       "hono": "^4.9.9",
     },
     repository: {
@@ -77,5 +78,23 @@ node_modules/
   `;
 
     Deno.writeTextFileSync("./dist/.npmignore", customNpmignore);
+
+    // Remove hono from dependencies and keep only as peerDependency
+    const packageJsonPath = "./dist/package.json";
+    const packageJson = JSON.parse(Deno.readTextFileSync(packageJsonPath));
+
+    if (packageJson.dependencies?.hono) {
+      delete packageJson.dependencies.hono;
+    }
+
+    // Clean up empty dependencies object
+    if (Object.keys(packageJson.dependencies || {}).length === 0) {
+      delete packageJson.dependencies;
+    }
+
+    Deno.writeTextFileSync(
+      packageJsonPath,
+      JSON.stringify(packageJson, null, 2) + "\n",
+    );
   },
 });
