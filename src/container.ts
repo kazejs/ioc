@@ -244,7 +244,11 @@ export class Container implements IContainer {
         "onApplicationBootstrap" in service &&
         typeof service.onApplicationBootstrap === "function"
       ) {
-        console.info(`[IoC::${this.namespace}] ⚙️ Bootstrap serviço: ${this.tokenToString(token)}`);
+        console.info(
+          `[IoC::${this.namespace}] ⚙️ Bootstrap serviço: ${
+            this.tokenToString(token)
+          }`,
+        );
         await service.onApplicationBootstrap();
       }
     }
@@ -265,7 +269,9 @@ export class Container implements IContainer {
           typeof instance.onApplicationBootstrap === "function"
         ) {
           console.info(
-            `[IoC::${this.namespace}] 🏭 Bootstrap serviço factory: ${this.tokenToString(token)}`,
+            `[IoC::${this.namespace}] 🏭 Bootstrap serviço factory: ${
+              this.tokenToString(token)
+            }`,
           );
           initPromises.push(instance.onApplicationBootstrap());
         }
@@ -289,7 +295,11 @@ export class Container implements IContainer {
         "onApplicationShutdown" in service &&
         typeof service.onApplicationShutdown === "function"
       ) {
-        console.info(`[IoC::${this.namespace}] 🛑 Shutdown serviço: ${this.tokenToString(token)}`);
+        console.info(
+          `[IoC::${this.namespace}] 🛑 Shutdown serviço: ${
+            this.tokenToString(token)
+          }`,
+        );
         shutdownPromises.push(service.onApplicationShutdown(signal));
       }
     }

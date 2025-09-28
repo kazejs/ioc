@@ -1,5 +1,7 @@
+// Core IoC functionality
 export type {
   FactoryFn,
+  IContainer,
   IocVariables,
   IProvider,
   ProviderToken,
@@ -12,4 +14,3 @@ export type {
 export { LifeTime } from "./enums.ts";
 export { Container } from "./container.ts";
 export { IoC } from "./ioc.ts";
-export { contextIoC } from "./middleware.ts";
