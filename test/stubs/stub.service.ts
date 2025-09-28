@@ -1,7 +1,7 @@
 import type {
   OnApplicationBootstrap,
   OnApplicationShutdown,
-} from "@kaze/core/ioc/mod.ts";
+} from "../../src/mod.ts";
 
 export class StubService
   implements OnApplicationBootstrap, OnApplicationShutdown {
