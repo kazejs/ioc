@@ -2,7 +2,7 @@ import type { IContainer, IProvider, ProviderToken } from "./types.ts";
 import { Container } from "./container.ts";
 
 export class IoC {
-  static namespaces = new Map<string, IContainer>();
+  static namespaces: Map<string, IContainer> = new Map<string, IContainer>();
 
   static register(
     provider: IProvider,
