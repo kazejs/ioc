@@ -177,8 +177,7 @@
     "dependencies": [
       "jsr:@deno/dnt@~0.42.3",
       "jsr:@std/assert@1.0.14",
-      "jsr:@std/cli@^1.0.22",
-      "npm:hono@^4.9.9"
+      "jsr:@std/cli@^1.0.22"
     ]
   }
 }

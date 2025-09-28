@@ -1,5 +1,5 @@
-import type { MiddlewareHandler } from "hono";
-import { createMiddleware } from "hono/factory";
+import type { MiddlewareHandler } from "npm:hono@^4.9.9";
+import { createMiddleware } from "npm:hono@^4.9.9/factory";
 import type { IContainer, IocVariables, ProviderToken } from "../types.ts";
 
 type Env = { Variables: IocVariables & { requestId: string } };
