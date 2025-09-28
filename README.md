@@ -1,4 +1,10 @@
-# Sistema de Injeção de Dependências (IoC) para Deno + Hono
+# Injeção de Dependências (IoC)
+
+Biblioteca standalone, sem dependências externas, para Injeção de Dependências
+(IoC) em aplicações Deno/NodeJS/TypeScript, com suporte a namespaces, escopos e
+lifecycle hooks.
+
+Inclui middleware para integração com frameworks web como Hono.
 
 ## Visão Geral
 
@@ -27,7 +33,7 @@ enum LifeTime {
 Ponto de acesso global para gerenciamento de containers:
 
 ```typescript
-import { IoC, LifeTime } from "@kaze/core/ioc/mod.ts";
+import { IoC, LifeTime } from "@kazejs/ioc/mod.ts";
 
 // Registrar provider
 IoC.register({
@@ -49,7 +55,7 @@ const db = IoC.use("db", "database");
 Implementação do container de DI:
 
 ```typescript
-import { Container, LifeTime } from "@kaze/core/ioc/mod.ts";
+import { Container, LifeTime } from "@kazejs/ioc/mod.ts";
 
 const container = new Container("myApp");
 
@@ -81,7 +87,7 @@ Serviços podem implementar hooks de inicialização e finalização:
 import {
   OnApplicationBootstrap,
   OnApplicationShutdown,
-} from "@kaze/core/ioc/mod.ts";
+} from "@kazejs/ioc/mod.ts";
 
 class DatabaseService implements OnApplicationBootstrap, OnApplicationShutdown {
   private connection: any;
@@ -130,7 +136,7 @@ Injeção automática de IoC no contexto de requisições:
 
 ```typescript
 import { Hono } from "hono";
-import { IoC, iocMiddleware } from "@kaze/core/ioc/mod.ts";
+import { IoC, iocMiddleware } from "@kazejs/ioc/mod.ts";
 
 const app = new Hono();
 const container = IoC.ns("default");
@@ -246,8 +252,8 @@ import {
   LifeTime,
   OnApplicationBootstrap,
   OnApplicationShutdown,
-} from "@kaze/core/ioc/mod.ts";
-import {} from "@kaze/core/ioc/mod.ts";
+} from "@kazejs/ioc/mod.ts";
+import {} from "@kazejs/ioc/mod.ts";
 
 // Serviços com Lifecycle
 class Logger implements OnApplicationBootstrap {

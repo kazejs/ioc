@@ -6,7 +6,7 @@
   "exports": {
     ".": "./mod.ts",
     "./types": "./types.ts",
-    "./hono": "./hono/mod.ts"
+    "./hono": "./src/hono/mod.ts"
   },
   "tasks": {
     "test:npm": "deno run -A scripts/build_npm.ts --test",
@@ -33,8 +33,7 @@
   "lint": {
     "exclude": [
       "dist/",
-      ".coverage/",
-      "scripts/mods/"
+      ".coverage/"
     ]
   },
   "publish": {
@@ -42,6 +41,7 @@
       "src",
       "mod.ts",
       "types.ts",
+      "hono.ts",
       "LICENSE",
       "README.md"
     ],
@@ -49,8 +49,7 @@
       "tests",
       "scripts",
       ".tmp",
-      "node_modules",
-      "scripts/mods"
+      "node_modules"
     ]
   }
 }
