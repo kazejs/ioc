@@ -189,7 +189,47 @@ app.get("/", (c) => {
   // Usar função helper (com escopo automático)
   const service = c.get("use")<MyService>("myService");
 
+  // Ou usar o método ctx.use() diretamente (requer declaração de tipo)
+  const service2 = c.use<MyService>("myService");
+
   return c.json({ message: "OK" });
+});
+```
+
+### Usando `ctx.use()` com TypeScript
+
+O middleware adiciona dinamicamente o método `ctx.use()` ao contexto do Hono.
+Para ter suporte completo do TypeScript a este método, adicione a seguinte
+declaração de tipo no seu projeto (por exemplo, em `types.ts` ou no início do
+arquivo):
+
+```typescript
+import type { ProviderToken } from "@kazejs/ioc/types";
+
+declare module "hono" {
+  interface Context {
+    // deno-lint-ignore no-explicit-any
+    use: <T>(provider: ProviderToken | (new (...args: any) => T)) => T;
+  }
+}
+```
+
+**Nota:** Esta declaração de tipo **não é compatível com JSR/Deno** ao publicar
+pacotes, pois módulos ambientes não são suportados. Se você está desenvolvendo
+um pacote para publicação no JSR, prefira usar `c.get("use")` ao invés de
+`c.use()`.
+
+#### Duas formas de usar:
+
+```typescript
+app.get("/", (c) => {
+  // Opção 1: Usando c.get("use") - sempre funciona, tipagem garantida
+  const service1 = c.get("use")<MyService>("myService");
+
+  // Opção 2: Usando c.use() - requer declaração de tipo acima
+  const service2 = c.use<MyService>("myService");
+
+  // Ambas são equivalentes e trabalham com escopo automático
 });
 ```
 
