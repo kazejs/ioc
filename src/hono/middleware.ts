@@ -39,8 +39,10 @@ export function contextIoC(container: IContainer): MiddlewareHandler<Env> {
     // Adiciona o método use() diretamente ao contexto
     // Para tipagem, veja documentação acima
     // deno-lint-ignore no-explicit-any
-    (ctx as any).use = <T>(provider: ProviderToken | (new (...args: any) => T)): T =>
-      container.use(provider, scopeId);
+    (ctx as any).use = <T>(
+      // deno-lint-ignore no-explicit-any
+      provider: ProviderToken | (new (...args: any) => T),
+    ): T => container.use(provider, scopeId);
 
     await next();
 

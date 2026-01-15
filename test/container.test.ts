@@ -5,6 +5,7 @@ import {
   type FactoryFn,
   LifeTime,
   type OnApplicationBootstrap,
+  type OnApplicationRegister,
   type OnApplicationShutdown,
 } from "../src/mod.ts";
 import { IoC } from "../src/ioc.ts";
@@ -20,7 +21,7 @@ container.registerValue(TOKEN_A, "AA");
 container.registerValue(TOKEN_B, "BB");
 container.registerValue(StubService, new StubService());
 
-await container.initializeServices();
+await container.bootstrapServices();
 
 Deno.test("Use token A", function addTest() {
   const value = container.use(TOKEN_A);
@@ -175,11 +176,21 @@ Deno.test("Register without token", function scopedTest() {
 
 Deno.test("Container lifecycle", async function hasTest() {
   const calledFn = {
+    onApplicationRegisterCalled: false,
     onApplicationBootstrapCalled: false,
     onApplicationShutdownCalled: false,
   };
 
-  class FakeService implements OnApplicationShutdown, OnApplicationBootstrap {
+  class FakeService
+    implements
+      OnApplicationRegister,
+      OnApplicationShutdown,
+      OnApplicationBootstrap {
+    onApplicationRegister(): void {
+      calledFn.onApplicationRegisterCalled = true;
+      return undefined;
+    }
+
     onApplicationBootstrap(): void {
       calledFn.onApplicationBootstrapCalled = true;
       return undefined;
@@ -194,17 +205,29 @@ Deno.test("Container lifecycle", async function hasTest() {
   const ioc = IoC.create("lifecycle-test");
   ioc.registerValue(FakeService, new FakeService());
 
+  await ioc.registerServices();
+  assertEquals(calledFn.onApplicationRegisterCalled, true);
+  assertEquals(calledFn.onApplicationBootstrapCalled, false);
+  assertEquals(calledFn.onApplicationShutdownCalled, false);
+
+  calledFn.onApplicationRegisterCalled = false;
+  calledFn.onApplicationBootstrapCalled = false;
+  calledFn.onApplicationShutdownCalled = false;
+
   // Testando o bootstrap
-  await ioc.initializeServices();
+  await ioc.bootstrapServices();
+  assertEquals(calledFn.onApplicationRegisterCalled, false);
   assertEquals(calledFn.onApplicationBootstrapCalled, true);
   assertEquals(calledFn.onApplicationShutdownCalled, false);
 
   // Resetando os valores
+  calledFn.onApplicationRegisterCalled = false;
   calledFn.onApplicationBootstrapCalled = false;
   calledFn.onApplicationShutdownCalled = false;
 
   // Testando o shutdown
   await ioc.shutdownServices("SIGINT");
+  assertEquals(calledFn.onApplicationRegisterCalled, false);
   assertEquals(calledFn.onApplicationBootstrapCalled, false);
   assertEquals(calledFn.onApplicationShutdownCalled, true);
 });

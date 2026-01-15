@@ -13,7 +13,7 @@ Inclui middleware para integração com frameworks web como Hono.
 - ✅ **TypeScript nativo** - Totalmente tipado
 - ✅ **Namespaces isolados** - Múltiplos containers independentes
 - ✅ **Gestão de escopos** - Singleton, Scoped, Transient
-- ✅ **Lifecycle hooks** - onApplicationBootstrap/Shutdown
+- ✅ **Lifecycle hooks** - onApplicationRegister/Bootstrap/Shutdown
 - ✅ **Middleware web** - Integração com Hono (extensível para outros
   frameworks)
 - ✅ **Injeção automática** - Resolve dependências recursivamente
@@ -117,15 +117,29 @@ container.clearScope(scopeId);
 Serviços podem implementar hooks de inicialização e finalização:
 
 ```typescript
-import { OnApplicationBootstrap, OnApplicationShutdown } from "@kazejs/ioc";
+import {
+  OnApplicationBootstrap,
+  OnApplicationRegister,
+  OnApplicationShutdown,
+} from "@kazejs/ioc";
 
-class DatabaseService implements OnApplicationBootstrap, OnApplicationShutdown {
+class DatabaseService
+  implements
+    OnApplicationRegister,
+    OnApplicationBootstrap,
+    OnApplicationShutdown {
   private connection: any;
+
+  // Hook de registro
+  async onApplicationRegister(): Promise<void> {
+    console.log("Registrando provedor de banco de dados...");
+    this.client = this.registerDbClient();
+  }
 
   // Hook de inicialização
   async onApplicationBootstrap(): Promise<void> {
     console.log("Inicializando conexão com banco de dados...");
-    this.connection = await this.connect();
+    this.connection = await this.client.connect();
   }
 
   // Hook de finalização
@@ -134,10 +148,12 @@ class DatabaseService implements OnApplicationBootstrap, OnApplicationShutdown {
     await this.connection.close();
   }
 
-  private async connect() {
-    // Lógica de conexão
+  private registerDbClient() {
     return {
-      close: async () => {
+      connect: () => {
+        return {
+          close: async () => {},
+        };
       },
     };
   }
@@ -156,7 +172,7 @@ IoC.register({
 
 // Os hooks são chamados automaticamente
 const container = IoC.create("default");
-await container.initializeServices(); // Chama onApplicationBootstrap
+await container.bootstrapServices(); // Chama onApplicationBootstrap
 await container.shutdownServices(); // Chama onApplicationShutdown
 ```
 
@@ -315,7 +331,7 @@ container.clearScope(scopeId);
 const container = IoC.ns("default");
 
 // Inicializar todos os serviços
-await container.initializeServices();
+await container.bootstrapServices();
 
 // Finalizar todos os serviços
 await container.shutdownServices();
@@ -399,7 +415,7 @@ IoC.register({
 });
 
 // Inicialização (chama lifecycle hooks)
-await container.initializeServices();
+await container.bootstrapServices();
 
 // Middleware
 app.use(contextIoC(container));

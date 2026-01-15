@@ -9,6 +9,7 @@ export type {
 } from "./types.ts";
 export type {
   OnApplicationBootstrap,
+  OnApplicationRegister,
   OnApplicationShutdown,
 } from "./lifecycle.ts";
 export { LifeTime } from "./enums.ts";
