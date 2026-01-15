@@ -1,11 +1,17 @@
 import type {
+  OnApplicationRegister,
   OnApplicationBootstrap,
   OnApplicationShutdown,
 } from "../../src/mod.ts";
 
 export class StubService
-  implements OnApplicationBootstrap, OnApplicationShutdown {
+  implements OnApplicationRegister, OnApplicationBootstrap, OnApplicationShutdown {
   constructor(private readonly world: string = "bar") {
+  }
+
+  onApplicationRegister(): void | Promise<void> {
+    console.log("StubService::onApplicationRegister");
+    return undefined;
   }
 
   onApplicationBootstrap(): void | Promise<void> {

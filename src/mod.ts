@@ -8,6 +8,7 @@ export type {
   UseFactoryFn,
 } from "./types.ts";
 export type {
+  OnApplicationRegister,
   OnApplicationBootstrap,
   OnApplicationShutdown,
 } from "./lifecycle.ts";

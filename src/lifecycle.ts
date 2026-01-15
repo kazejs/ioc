@@ -1,3 +1,10 @@
+export interface OnApplicationRegister {
+  /**
+   * Method called during application register.
+   */
+  onApplicationRegister(): void | Promise<void>;
+}
+
 export interface OnApplicationBootstrap {
   /**
    * Method called during application bootstrap.

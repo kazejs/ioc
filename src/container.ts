@@ -25,7 +25,8 @@ export class Container implements IContainer {
     Map<ProviderToken, unknown>
   >();
 
-  private initializing = false;
+  private registering = false;
+  private bootstraping = false;
 
   constructor(public readonly namespace = "default") {}
 
@@ -63,7 +64,7 @@ export class Container implements IContainer {
     value: unknown,
     lifeTime = LifeTime.SINGLETON,
   ): void {
-    // if (this.initializing) {
+    // if (this.bootstraping) {
     //   throw new Error(
     //     "Não é possível registrar serviços durante a inicialização",
     //   );
@@ -88,7 +89,7 @@ export class Container implements IContainer {
     factory: FactoryFn<T, this>,
     lifeTime: LifeTime = LifeTime.SINGLETON,
   ): void {
-    if (this.initializing) {
+    if (this.bootstraping) {
       throw new Error(
         "Não é possível registrar serviços durante a inicialização",
       );
@@ -199,7 +200,7 @@ export class Container implements IContainer {
       return instance as T;
     }
 
-    if (!this.initializing) {
+    if (!this.bootstraping) {
       throw new Error(
         `Serviço '${tokenName}' não registrado no container pois aplicação não foi inicializada`,
       );
@@ -227,15 +228,68 @@ export class Container implements IContainer {
     return () => this.get<T>(token);
   }
 
-  /**
-   * Inicializa todos os serviços registrados
+   /**
+   * Registra todos os serviços registrados
    */
-  public async initializeServices(): Promise<void> {
-    if (this.initializing) {
+   public async registerServices(): Promise<void> {
+    if (this.registering) {
       return;
     }
 
-    this.initializing = true;
+    this.registering = true;
+
+    for await (const [token, service] of this.services.entries()) {
+      if (
+        typeof service === "object" && service !== null &&
+        "onApplicationRegister" in service &&
+        typeof service.onApplicationRegister === "function"
+      ) {
+        console.info(
+          `[IoC::${this.namespace}] ⚙️ Registering serviço: ${
+            this.tokenToString(token)
+          }`,
+        );
+        await service.onApplicationRegister();
+      }
+    }
+
+    const initPromises: Promise<void>[] = [];
+
+    for (const [token, factory] of this.serviceFactories.entries()) {
+      const scope = this.serviceLifeTime.get(token)!;
+
+      if (scope === LifeTime.SINGLETON && !this.services.has(token)) {
+        const instance = factory(this);
+        this.services.set(token, instance);
+
+        if (
+          typeof instance === "object" && instance !== null &&
+          "onApplicationRegister" in instance &&
+          typeof instance.onApplicationRegister === "function"
+        ) {
+          console.info(
+            `[IoC::${this.namespace}] 🏭 Registering serviço factory: ${
+              this.tokenToString(token)
+            }`,
+          );
+          initPromises.push(instance.onApplicationRegister());
+        }
+      }
+    }
+
+    await Promise.all(initPromises);
+    this.registering = false;
+  }
+
+  /**
+   * Inicializa todos os serviços registrados
+   */
+  public async bootstrapServices(): Promise<void> {
+    if (this.bootstraping) {
+      return;
+    }
+
+    this.bootstraping = true;
 
     // Inicializa serviços registrados diretamente
     for await (const [token, service] of this.services.entries()) {
@@ -279,7 +333,7 @@ export class Container implements IContainer {
     }
 
     await Promise.all(initPromises);
-    this.initializing = false;
+    this.bootstraping = false;
   }
 
   /**

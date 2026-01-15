@@ -23,7 +23,7 @@ export interface IContainer {
     provider: ProviderToken | (new (...args: any) => T) | IConstructor,
     scopeId?: string,
   ): T;
-  initializeServices(): Promise<void>;
+  bootstrapServices(): Promise<void>;
   shutdownServices(signal: string): Promise<void>;
 }
 
