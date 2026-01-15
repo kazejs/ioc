@@ -1,11 +1,14 @@
 import type {
-  OnApplicationRegister,
   OnApplicationBootstrap,
+  OnApplicationRegister,
   OnApplicationShutdown,
 } from "../../src/mod.ts";
 
 export class StubService
-  implements OnApplicationRegister, OnApplicationBootstrap, OnApplicationShutdown {
+  implements
+    OnApplicationRegister,
+    OnApplicationBootstrap,
+    OnApplicationShutdown {
   constructor(private readonly world: string = "bar") {
   }
 

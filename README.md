@@ -117,9 +117,17 @@ container.clearScope(scopeId);
 Serviços podem implementar hooks de inicialização e finalização:
 
 ```typescript
-import { OnApplicationRegister, OnApplicationBootstrap, OnApplicationShutdown } from "@kazejs/ioc";
+import {
+  OnApplicationBootstrap,
+  OnApplicationRegister,
+  OnApplicationShutdown,
+} from "@kazejs/ioc";
 
-class DatabaseService implements OnApplicationRegister, OnApplicationBootstrap, OnApplicationShutdown {
+class DatabaseService
+  implements
+    OnApplicationRegister,
+    OnApplicationBootstrap,
+    OnApplicationShutdown {
   private connection: any;
 
   // Hook de registro
@@ -146,7 +154,7 @@ class DatabaseService implements OnApplicationRegister, OnApplicationBootstrap, 
         return {
           close: async () => {},
         };
-      }
+      },
     };
   }
 

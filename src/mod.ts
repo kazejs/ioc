@@ -8,8 +8,8 @@ export type {
   UseFactoryFn,
 } from "./types.ts";
 export type {
-  OnApplicationRegister,
   OnApplicationBootstrap,
+  OnApplicationRegister,
   OnApplicationShutdown,
 } from "./lifecycle.ts";
 export { LifeTime } from "./enums.ts";

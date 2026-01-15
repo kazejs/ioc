@@ -4,8 +4,8 @@ import {
   Container,
   type FactoryFn,
   LifeTime,
-  type OnApplicationRegister,
   type OnApplicationBootstrap,
+  type OnApplicationRegister,
   type OnApplicationShutdown,
 } from "../src/mod.ts";
 import { IoC } from "../src/ioc.ts";
@@ -181,7 +181,11 @@ Deno.test("Container lifecycle", async function hasTest() {
     onApplicationShutdownCalled: false,
   };
 
-  class FakeService implements OnApplicationRegister,OnApplicationShutdown, OnApplicationBootstrap {
+  class FakeService
+    implements
+      OnApplicationRegister,
+      OnApplicationShutdown,
+      OnApplicationBootstrap {
     onApplicationRegister(): void {
       calledFn.onApplicationRegisterCalled = true;
       return undefined;

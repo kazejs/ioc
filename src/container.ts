@@ -228,10 +228,10 @@ export class Container implements IContainer {
     return () => this.get<T>(token);
   }
 
-   /**
+  /**
    * Registra todos os serviços registrados
    */
-   public async registerServices(): Promise<void> {
+  public async registerServices(): Promise<void> {
     if (this.registering) {
       return;
     }
